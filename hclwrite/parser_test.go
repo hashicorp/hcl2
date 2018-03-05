@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/hashicorp/hcl2/hcl"
+	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/kylelemons/godebug/pretty"
 )
 
@@ -612,6 +612,183 @@ func TestParse(t *testing.T) {
 								{
 									Type:         hclsyntax.TokenIdent,
 									Bytes:        []byte(`b`),
+									SpacesBefore: 0,
+								},
+							},
+						},
+						&TokenSeq{
+							Tokens{
+								{
+									Type:         hclsyntax.TokenOBrace,
+									Bytes:        []byte(`{`),
+									SpacesBefore: 1,
+								},
+							},
+						},
+						(*TokenSeq)(nil), // the empty body
+						&TokenSeq{
+							Tokens{
+								{
+									Type:         hclsyntax.TokenCBrace,
+									Bytes:        []byte(`}`),
+									SpacesBefore: 0,
+								},
+							},
+						},
+						&TokenSeq{
+							Tokens{
+								{
+									Type:         hclsyntax.TokenNewline,
+									Bytes:        []byte{'\n'},
+									SpacesBefore: 0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			"b \"a\" {}\n",
+			&Body{
+				Items: []Node{
+					&Block{
+						AllTokens: &TokenSeq{
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenIdent,
+										Bytes:        []byte(`b`),
+										SpacesBefore: 0,
+									},
+								},
+							},
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenOQuote,
+										Bytes:        []byte(`"`),
+										SpacesBefore: 1,
+									},
+									{
+										Type:         hclsyntax.TokenQuotedLit,
+										Bytes:        []byte(`a`),
+										SpacesBefore: 0,
+									},
+									{
+										Type:         hclsyntax.TokenCQuote,
+										Bytes:        []byte(`"`),
+										SpacesBefore: 0,
+									},
+								},
+							},
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenOBrace,
+										Bytes:        []byte(`{`),
+										SpacesBefore: 1,
+									},
+								},
+							},
+							(*TokenSeq)(nil), // the empty body
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenCBrace,
+										Bytes:        []byte(`}`),
+										SpacesBefore: 0,
+									},
+								},
+							},
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenNewline,
+										Bytes:        []byte{'\n'},
+										SpacesBefore: 0,
+									},
+								},
+							},
+						},
+						TypeTokens: &TokenSeq{Tokens{
+							{
+								Type:         hclsyntax.TokenIdent,
+								Bytes:        []byte(`b`),
+								SpacesBefore: 0,
+							},
+						}},
+						LabelTokens: []*TokenSeq{
+							&TokenSeq{
+								Tokens{
+									{
+										Type:         hclsyntax.TokenOQuote,
+										Bytes:        []byte(`"`),
+										SpacesBefore: 1,
+									},
+									{
+										Type:         hclsyntax.TokenQuotedLit,
+										Bytes:        []byte(`a`),
+										SpacesBefore: 0,
+									},
+									{
+										Type:         hclsyntax.TokenCQuote,
+										Bytes:        []byte(`"`),
+										SpacesBefore: 0,
+									},
+								},
+							},
+						},
+						OBraceTokens: &TokenSeq{Tokens{
+							{
+								Type:         hclsyntax.TokenOBrace,
+								Bytes:        []byte(`{`),
+								SpacesBefore: 1,
+							},
+						}},
+						Body: &Body{},
+						CBraceTokens: &TokenSeq{Tokens{
+							{
+								Type:         hclsyntax.TokenCBrace,
+								Bytes:        []byte(`}`),
+								SpacesBefore: 0,
+							},
+						}},
+						EOLTokens: &TokenSeq{Tokens{
+							{
+								Type:         hclsyntax.TokenNewline,
+								Bytes:        []byte{'\n'},
+								SpacesBefore: 0,
+							},
+						}},
+					},
+				},
+				AllTokens: &TokenSeq{
+					&TokenSeq{
+						&TokenSeq{
+							Tokens{
+								{
+									Type:         hclsyntax.TokenIdent,
+									Bytes:        []byte(`b`),
+									SpacesBefore: 0,
+								},
+							},
+						},
+						&TokenSeq{
+							Tokens{
+								{
+									Type:         hclsyntax.TokenOQuote,
+									Bytes:        []byte(`"`),
+									SpacesBefore: 1,
+								},
+								{
+									Type:         hclsyntax.TokenQuotedLit,
+									Bytes:        []byte(`a`),
+									SpacesBefore: 0,
+								},
+								{
+									Type:         hclsyntax.TokenCQuote,
+									Bytes:        []byte(`"`),
 									SpacesBefore: 0,
 								},
 							},

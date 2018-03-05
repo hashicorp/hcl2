@@ -278,7 +278,10 @@ func parseBlock(nativeBlock *hclsyntax.Block, from, leadComments, lineComments, 
 		}
 		seq := labelTokens.Seq()
 		block.LabelTokens = append(block.LabelTokens, seq)
-		*(block.LabelTokensFlat) = append(*(block.LabelTokensFlat), seq)
+
+		if block.LabelTokensFlat != nil {
+			*(block.LabelTokensFlat) = append(*(block.LabelTokensFlat), seq)
+		}
 		allTokens = append(allTokens, seq)
 	}
 
