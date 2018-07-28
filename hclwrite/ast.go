@@ -2,9 +2,11 @@ package hclwrite
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 
 	"github.com/hashicorp/hcl2/hcl"
+	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -71,10 +73,6 @@ func (n *Body) AppendItem(node Node) {
 }
 
 func (n *Body) AppendUnstructuredTokens(seq *TokenSeq) {
-	if n.AllTokens == nil {
-		new := make(TokenSeq, 0, 1)
-		n.AllTokens = &new
-	}
 	*(n.AllTokens) = append(*(n.AllTokens), seq)
 }
 
@@ -106,7 +104,67 @@ func (n *Body) FindAttribute(name string) *Attribute {
 // The return value is the attribute that was either modified in-place or
 // created.
 func (n *Body) SetAttributeValue(name string, val cty.Value) *Attribute {
-	panic("Body.SetAttributeValue not yet implemented")
+	if !hclsyntax.ValidIdentifier(name) {
+		panic(fmt.Sprintf("invalid attribute name %q", name))
+	}
+
+	exprTokens := TokensForValue(val)
+	if len(exprTokens) > 0 {
+		exprTokens[0].SpacesBefore = 1
+	}
+
+	attr := n.FindAttribute(name)
+	if attr == nil {
+		attr := &Attribute{}
+		var allTokens TokenSeq
+
+		attr.NameTokens = &TokenSeq{
+			&Token{
+				Type:         hclsyntax.TokenIdent,
+				Bytes:        []byte(name),
+				SpacesBefore: n.IndentLevel,
+			},
+		}
+		allTokens = append(allTokens, attr.NameTokens)
+
+		attr.EqualsTokens = &TokenSeq{
+			&Token{
+				Type:         hclsyntax.TokenEqual,
+				Bytes:        []byte{'='},
+				SpacesBefore: 1,
+			},
+		}
+		allTokens = append(allTokens, attr.EqualsTokens)
+
+		expr := &Expression{
+			AllTokens: &TokenSeq{exprTokens},
+		}
+		attr.Expr = expr
+		allTokens = append(allTokens, expr.AllTokens)
+
+		attr.EOLTokens = &TokenSeq{
+			&Token{
+				Type:         hclsyntax.TokenNewline,
+				Bytes:        []byte{'\n'},
+				SpacesBefore: 0,
+			},
+		}
+		allTokens = append(allTokens, attr.EOLTokens)
+
+		attr.AllTokens = &allTokens
+		return attr
+	}
+
+	oldExpr := attr.Expr
+	newExpr := &Expression{
+		AllTokens: oldExpr.AllTokens,
+	}
+	*newExpr.AllTokens = TokenSeq{exprTokens}
+	attr.Expr = newExpr
+
+	n.AppendItem(attr)
+
+	return attr
 }
 
 // SetAttributeTraversal either replaces the expression of an existing attribute

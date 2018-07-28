@@ -163,7 +163,9 @@ func parseBody(nativeBody *hclsyntax.Body, from inputTokens) (inputTokens, *Body
 	}
 	sort.Sort(nativeNodeSorter{nativeItems})
 
+	allTokens := make(TokenSeq, 0, 1)
 	body := &Body{
+		AllTokens:   &allTokens,
 		IndentLevel: 0, // TODO: deal with this
 	}
 

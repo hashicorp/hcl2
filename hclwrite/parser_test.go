@@ -22,7 +22,7 @@ func TestParse(t *testing.T) {
 			"",
 			&Body{
 				Items:     nil,
-				AllTokens: nil,
+				AllTokens: &TokenSeq{},
 			},
 		},
 		{
@@ -588,7 +588,7 @@ func TestParse(t *testing.T) {
 									},
 								},
 							},
-							(*TokenSeq)(nil), // the empty body
+							&TokenSeq{}, // the empty body
 							&TokenSeq{
 								Tokens{
 									{
@@ -622,7 +622,9 @@ func TestParse(t *testing.T) {
 								SpacesBefore: 1,
 							},
 						}},
-						Body: &Body{},
+						Body: &Body{
+							AllTokens: &TokenSeq{},
+						},
 						CBraceTokens: &TokenSeq{Tokens{
 							{
 								Type:         hclsyntax.TokenCBrace,
@@ -659,7 +661,7 @@ func TestParse(t *testing.T) {
 								},
 							},
 						},
-						(*TokenSeq)(nil), // the empty body
+						&TokenSeq{}, // the empty body
 						&TokenSeq{
 							Tokens{
 								{
