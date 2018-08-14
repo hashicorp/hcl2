@@ -84,7 +84,7 @@ type Attribute struct {
 	leadComments *node
 	name         *node
 	expr         *node
-	lineComments *node
+	lineComments *node // If no line comments, this contains the newline marking the end of the attribute
 }
 
 func newAttribute() *Attribute {
@@ -108,17 +108,37 @@ func (a *Attribute) init(name string, expr *Expression) {
 	})
 	a.expr = a.children.Append(expr)
 	a.expr.list = a.children
-	a.lineComments = a.children.Append(newComments(nil))
-	a.children.AppendUnstructuredTokens(Tokens{
+	a.lineComments = a.children.Append(newComments(Tokens{
+		{
+			Type:  hclsyntax.TokenNewline,
+			Bytes: []byte{'\n'},
+		},
+	}))
+}
+
+func (a *Attribute) Expr() *Expression {
+	return a.expr.content.(*Expression)
+}
+
+// ClearLeadComments empties out the lead comments from the receiving attribute.
+// This can be useful for callers that have made an edit that may have
+// invalidated an existing comment.
+func (a *Attribute) ClearLeadComments() {
+	new := newComments(nil)
+	a.leadComments = a.leadComments.ReplaceWith(new)
+}
+
+// ClearLineComments empties out the line comments from the receiving attribute.
+// This can be useful for callers that have made an edit that may have
+// invalidated an existing comment.
+func (a *Attribute) ClearLineComments() {
+	new := newComments(Tokens{
 		{
 			Type:  hclsyntax.TokenNewline,
 			Bytes: []byte{'\n'},
 		},
 	})
-}
-
-func (a *Attribute) Expr() *Expression {
-	return a.expr.content.(*Expression)
+	a.lineComments = a.lineComments.ReplaceWith(new)
 }
 
 type Block struct {

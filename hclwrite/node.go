@@ -3,6 +3,8 @@ package hclwrite
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
+
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -58,6 +60,10 @@ func (n *node) Detach() {
 // The return value is the newly-constructed node, containing the given content.
 // After this function returns, the reciever is no longer attached to a list.
 func (n *node) ReplaceWith(c nodeContent) *node {
+	fmt.Print("--- Replace ---\n")
+	spew.Dump(n.content)
+	spew.Dump(c)
+	fmt.Print("---------------\n")
 	if n.list == nil {
 		panic("can't replace node that is not in a list")
 	}
@@ -102,6 +108,10 @@ func (ns *nodes) BuildTokens(to Tokens) Tokens {
 		to = n.BuildTokens(to)
 	}
 	return to
+}
+
+func (ns *nodes) Empty() bool {
+	return ns.first == nil
 }
 
 func (ns *nodes) Append(c nodeContent) *node {

@@ -412,3 +412,247 @@ func TestBodySetAttributeValue(t *testing.T) {
 		})
 	}
 }
+func TestAttributeClearComments(t *testing.T) {
+	tests := []struct {
+		src                  string
+		name                 string
+		clearLead, clearLine bool
+		want                 Tokens
+	}{
+		{
+			"# This is a file-level comment\n\n# This is a\na = 1 # That was a\n\n# This is b\nb = false # That was b\n",
+			"a",
+			false, true,
+			Tokens{
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is a file-level comment\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is a\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'a'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenNumberLit,
+					Bytes:        []byte("1"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'b'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte("false"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# That was b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEOF,
+					Bytes:        []byte{},
+					SpacesBefore: 0,
+				},
+			},
+		},
+		{
+			"# This is a file-level comment\n\n# This is a\na = 1 # That was a\n\n# This is b\nb = false # That was b\n",
+			"a",
+			true, false,
+			Tokens{
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is a file-level comment\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'a'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte("true"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'b'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte("false"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# That was b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEOF,
+					Bytes:        []byte{},
+					SpacesBefore: 0,
+				},
+			},
+		},
+		{
+			"# This is a file-level comment\n\n# This is a\na = 1 # That was a\n\n# This is b\nb = false # That was b\n",
+			"a",
+			true, true,
+			Tokens{
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is a file-level comment\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'a'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte("true"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenNewline,
+					Bytes:        []byte{'\n'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# This is b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte{'b'},
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEqual,
+					Bytes:        []byte{'='},
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenIdent,
+					Bytes:        []byte("false"),
+					SpacesBefore: 1,
+				},
+				{
+					Type:         hclsyntax.TokenComment,
+					Bytes:        []byte("# That was b\n"),
+					SpacesBefore: 0,
+				},
+				{
+					Type:         hclsyntax.TokenEOF,
+					Bytes:        []byte{},
+					SpacesBefore: 0,
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%s %s (%t %t)", test.src, test.name, test.clearLead, test.clearLine), func(t *testing.T) {
+			f, diags := ParseConfig([]byte(test.src), "", hcl.Pos{Line: 1, Column: 1})
+			if len(diags) != 0 {
+				for _, diag := range diags {
+					t.Logf("- %s", diag.Error())
+				}
+				t.Fatalf("unexpected diagnostics")
+			}
+
+			attr := f.Body().GetAttribute(test.name)
+			if attr == nil {
+				t.Fatalf("cannot find attribute %q in the root body", test.name)
+			}
+
+			if test.clearLead {
+				attr.ClearLeadComments()
+			}
+			if test.clearLine {
+				attr.ClearLineComments()
+			}
+			got := f.BuildTokens(nil)
+			if !reflect.DeepEqual(got, test.want) {
+				diff := cmp.Diff(test.want, got)
+				t.Errorf("wrong result\ngot:  %s\nwant: %s\ndiff:\n%s", spew.Sdump(got), spew.Sdump(test.want), diff)
+			}
+		})
+	}
+}

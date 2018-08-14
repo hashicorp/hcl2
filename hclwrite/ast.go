@@ -54,6 +54,10 @@ func (c *comments) BuildTokens(to Tokens) Tokens {
 	return c.tokens.BuildTokens(to)
 }
 
+func (c *comments) Empty() bool {
+	return len(c.tokens) == 0
+}
+
 type identifier struct {
 	leafNode
 
