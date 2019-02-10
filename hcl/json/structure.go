@@ -266,6 +266,9 @@ func (b *body) unpackBlock(v node, typeName string, typeRange *hcl.Range, labels
 	copy(labelR, labelRanges)
 
 	switch tv := v.(type) {
+	case *nullVal:
+		// There is no block content, e.g the value is null.
+		return
 	case *objectVal:
 		// Single instance of the block
 		*blocks = append(*blocks, &hcl.Block{
