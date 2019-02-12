@@ -327,6 +327,8 @@ func (b *body) collectDeepAttrs(v node, labelName *string) ([]*objectAttr, hcl.D
 	var attrs []*objectAttr
 
 	switch tv := v.(type) {
+	case *nullVal:
+		// If a value is null, then we don't return any attributes or return an error.
 
 	case *objectVal:
 		attrs = append(attrs, tv.Attrs...)

@@ -323,6 +323,27 @@ func TestBodyPartialContent(t *testing.T) {
 			0,
 		},
 		{
+			`{"resource": { "nested": null }}`,
+			&hcl.BodySchema{
+				Blocks: []hcl.BlockHeaderSchema{
+					{
+						Type:       "resource",
+						LabelNames: []string{"name"},
+					},
+				},
+			},
+			&hcl.BodyContent{
+				Attributes: map[string]*hcl.Attribute{},
+				Blocks:     nil,
+				MissingItemRange: hcl.Range{
+					Filename: "test.json",
+					Start:    hcl.Pos{Line: 1, Column: 32, Byte: 31},
+					End:      hcl.Pos{Line: 1, Column: 33, Byte: 32},
+				},
+			},
+			0,
+		},
+		{
 			`{"resource":{}}`,
 			&hcl.BodySchema{
 				Blocks: []hcl.BlockHeaderSchema{
