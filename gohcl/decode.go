@@ -119,6 +119,7 @@ func decodeBodyToStruct(body hcl.Body, ctx *hcl.EvalContext, val reflect.Value) 
 	for typeName, fieldIdx := range tags.Blocks {
 		blocks := blocksByType[typeName]
 		field := val.Type().Field(fieldIdx)
+		fieldV := val.Field(fieldIdx)
 
 		ty := field.Type
 		isSlice := false
@@ -170,9 +171,13 @@ func decodeBodyToStruct(body hcl.Body, ctx *hcl.EvalContext, val reflect.Value) 
 
 			for i, block := range blocks {
 				if isPtr {
-					v := reflect.New(ty)
-					diags = append(diags, decodeBlockToValue(block, ctx, v.Elem())...)
-					sli.Index(i).Set(v)
+					if fieldV.IsNil() {
+						v := reflect.New(ty)
+						diags = append(diags, decodeBlockToValue(block, ctx, v.Elem())...)
+						sli.Index(i).Set(v)
+					} else {
+						diags = append(diags, decodeBlockToValue(block, ctx, sli.Index(i).Elem())...)
+					}
 				} else {
 					diags = append(diags, decodeBlockToValue(block, ctx, sli.Index(i))...)
 				}
@@ -183,11 +188,15 @@ func decodeBodyToStruct(body hcl.Body, ctx *hcl.EvalContext, val reflect.Value) 
 		default:
 			block := blocks[0]
 			if isPtr {
-				v := reflect.New(ty)
-				diags = append(diags, decodeBlockToValue(block, ctx, v.Elem())...)
-				val.Field(fieldIdx).Set(v)
+				if fieldV.IsNil() {
+					v := reflect.New(ty)
+					diags = append(diags, decodeBlockToValue(block, ctx, v.Elem())...)
+					val.Field(fieldIdx).Set(v)
+				} else {
+					diags = append(diags, decodeBlockToValue(block, ctx, fieldV.Elem())...)
+				}
 			} else {
-				diags = append(diags, decodeBlockToValue(block, ctx, val.Field(fieldIdx))...)
+				diags = append(diags, decodeBlockToValue(block, ctx, fieldV)...)
 			}
 
 		}
