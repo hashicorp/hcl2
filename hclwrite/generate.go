@@ -2,6 +2,7 @@ package hclwrite
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 
@@ -72,23 +73,45 @@ func appendTokensForValue(val cty.Value, toks Tokens) Tokens {
 		})
 
 	case val.Type() == cty.String:
-		// TODO: If it's a multi-line string ending in a newline, format
+		// If it's a multi-line string ending in a newline, format
 		// it as a HEREDOC instead.
-		src := escapeQuotedStringLit(val.AsString())
-		toks = append(toks, &Token{
-			Type:  hclsyntax.TokenOQuote,
-			Bytes: []byte{'"'},
-		})
-		if len(src) > 0 {
+		valAsString := val.AsString()
+		if len(valAsString) > 1 && strings.HasSuffix(valAsString, "\n") {
+			// make a marker that is not conflicting with part of the string:
+			seed := "EOF"
+			marker := seed
+			counter := 1
+			for strings.Contains(valAsString, "\n"+marker) {
+				marker = fmt.Sprintf("%s%d", seed, counter)
+				counter++
+			}
 			toks = append(toks, &Token{
-				Type:  hclsyntax.TokenQuotedLit,
-				Bytes: src,
+				Type:  hclsyntax.TokenOHeredoc,
+				Bytes: []byte("<<"+marker+"\n"),
+			}, &Token{
+				Type:  hclsyntax.TokenStringLit,
+				Bytes: []byte(valAsString),
+			}, &Token{
+				Type:  hclsyntax.TokenCHeredoc,
+				Bytes: []byte(marker),
+			})
+		} else {
+			src := escapeQuotedStringLit(valAsString)
+			toks = append(toks, &Token{
+				Type:  hclsyntax.TokenOQuote,
+				Bytes: []byte{'"'},
+			})
+			if len(src) > 0 {
+				toks = append(toks, &Token{
+					Type:  hclsyntax.TokenQuotedLit,
+					Bytes: src,
+				})
+			}
+			toks = append(toks, &Token{
+				Type:  hclsyntax.TokenCQuote,
+				Bytes: []byte{'"'},
 			})
 		}
-		toks = append(toks, &Token{
-			Type:  hclsyntax.TokenCQuote,
-			Bytes: []byte{'"'},
-		})
 
 	case val.Type().IsListType() || val.Type().IsSetType() || val.Type().IsTupleType():
 		toks = append(toks, &Token{

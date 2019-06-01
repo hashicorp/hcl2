@@ -120,16 +120,16 @@ func TestTokensForValue(t *testing.T) {
 			cty.StringVal("hello\nworld\n"),
 			Tokens{
 				{
-					Type:  hclsyntax.TokenOQuote,
-					Bytes: []byte(`"`),
+					Type:  hclsyntax.TokenOHeredoc,
+					Bytes: []byte("<<EOF\n"),
 				},
 				{
-					Type:  hclsyntax.TokenQuotedLit,
-					Bytes: []byte(`hello\nworld\n`),
+					Type:  hclsyntax.TokenStringLit,
+					Bytes: []byte("hello\nworld\n"),
 				},
 				{
-					Type:  hclsyntax.TokenCQuote,
-					Bytes: []byte(`"`),
+					Type:  hclsyntax.TokenCHeredoc,
+					Bytes: []byte(`EOF`),
 				},
 			},
 		},
@@ -137,16 +137,33 @@ func TestTokensForValue(t *testing.T) {
 			cty.StringVal("hello\r\nworld\r\n"),
 			Tokens{
 				{
-					Type:  hclsyntax.TokenOQuote,
-					Bytes: []byte(`"`),
+					Type:  hclsyntax.TokenOHeredoc,
+					Bytes: []byte("<<EOF\n"),
 				},
 				{
-					Type:  hclsyntax.TokenQuotedLit,
-					Bytes: []byte(`hello\r\nworld\r\n`),
+					Type:  hclsyntax.TokenStringLit,
+					Bytes: []byte("hello\r\nworld\r\n"),
 				},
 				{
-					Type:  hclsyntax.TokenCQuote,
-					Bytes: []byte(`"`),
+					Type:  hclsyntax.TokenCHeredoc,
+					Bytes: []byte("EOF"),
+				},
+			},
+		},
+		{
+			cty.StringVal("conflicting\nEOF\nlook a like\nEOF1\n"),
+			Tokens{
+				{
+					Type:  hclsyntax.TokenOHeredoc,
+					Bytes: []byte("<<EOF2\n"),
+				},
+				{
+					Type:  hclsyntax.TokenStringLit,
+					Bytes: []byte("conflicting\nEOF\nlook a like\nEOF1\n"),
+				},
+				{
+					Type:  hclsyntax.TokenCHeredoc,
+					Bytes: []byte("EOF2"),
 				},
 			},
 		},
