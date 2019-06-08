@@ -109,11 +109,12 @@ func ImpliedBodySchema(val interface{}) (schema *hcl.BodySchema, partial bool) {
 }
 
 type fieldTags struct {
-	Attributes map[string]int
-	Blocks     map[string]int
-	Labels     []labelField
-	Remain     *int
-	Optional   map[string]bool
+	Attributes  map[string]int
+	Blocks      map[string]int
+	Labels      []labelField
+	Remain      *int
+	RemainField string
+	Optional    map[string]bool
 }
 
 type labelField struct {
@@ -162,6 +163,7 @@ func getFieldTags(ty reflect.Type) *fieldTags {
 			}
 			idx := i // copy, because this loop will continue assigning to i
 			ret.Remain = &idx
+			ret.RemainField = field.Name
 		case "optional":
 			ret.Attributes[name] = i
 			ret.Optional[name] = true

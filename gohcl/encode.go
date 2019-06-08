@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
@@ -185,6 +186,23 @@ func populateBody(rv reflect.Value, ty reflect.Type, tags *fieldTags, dst *hclwr
 					prevWasBlock = true
 				}
 				dst.AppendBlock(block)
+			}
+		}
+	}
+
+	if tags.RemainField != "" {
+		remain := rv.FieldByName(tags.RemainField)
+		if otherAttrs, ok := remain.Interface().(hcl.Attributes); ok {
+			for _, v := range otherAttrs {
+				if v.Expr.Variables() == nil {
+					val, diags := v.Expr.Value(nil)
+					if diags == nil {
+						dst.SetAttributeValue(v.Name, val)
+						continue
+					}
+				}
+				traversal, _ := hcl.AbsTraversalForExpr(v.Expr)
+				dst.SetAttributeTraversal(v.Name, traversal)
 			}
 		}
 	}
