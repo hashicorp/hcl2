@@ -1,6 +1,9 @@
 package hclwrite
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
@@ -75,6 +78,33 @@ func (b *Body) GetAttribute(name string) *Attribute {
 			if nameObj.hasName(name) {
 				// We've found it!
 				return attr
+			}
+		}
+	}
+
+	return nil
+}
+
+// GetBlock returns the block from the body that has the given name,
+// and labels or returns nil if there is currently no matching block.
+func (b *Body) GetBlock(typeName string, labels []string) *Block {
+	for n := range b.items {
+		if block, isBlock := n.content.(*Block); isBlock {
+			typeNameObj := block.typeName.content.(*identifier)
+			if typeNameObj.hasName(typeName) {
+				labelNames := make([]string, 0, len(labels))
+				list := block.labels.List()
+				for _, label := range list {
+					labelObj := label.content.(*quoted)
+					labelString := string(labelObj.tokens.Bytes())
+					// The labelString contains spaces and quotes. we should remove them.
+					trimmed := strings.Trim(labelString, ` "`)
+					labelNames = append(labelNames, trimmed)
+				}
+				if reflect.DeepEqual(labels, labelNames) {
+					// We've found it!
+					return block
+				}
 			}
 		}
 	}
