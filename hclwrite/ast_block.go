@@ -1,8 +1,6 @@
 package hclwrite
 
 import (
-	"strings"
-
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -85,12 +83,36 @@ func (b *Block) Type() string {
 func (b *Block) Labels() []string {
 	labelNames := make([]string, 0, len(b.labels))
 	list := b.labels.List()
+
 	for _, label := range list {
-		labelObj := label.content.(*quoted)
-		labelString := string(labelObj.tokens.Bytes())
-		// The labelString contains spaces and quotes. we should remove them.
-		trimmed := strings.Trim(labelString, ` "`)
-		labelNames = append(labelNames, trimmed)
+		switch labelObj := label.content.(type) {
+		case *identifier:
+			if labelObj.token.Type == hclsyntax.TokenIdent {
+				labelString := string(labelObj.token.Bytes)
+				labelNames = append(labelNames, labelString)
+			}
+
+		case *quoted:
+			tokens := labelObj.tokens
+			if len(tokens) == 3 &&
+				tokens[0].Type == hclsyntax.TokenOQuote &&
+				tokens[1].Type == hclsyntax.TokenQuotedLit &&
+				tokens[2].Type == hclsyntax.TokenCQuote {
+				// Note that TokenQuotedLit may contain escape sequences.
+				labelString, diags := hclsyntax.ParseStringLiteralToken(tokens[1].asHCLSyntax())
+
+				// If parsing the string literal returns error diagnostics
+				// then we can just assume the label doesn't match, because it's invalid in some way.
+				if !diags.HasErrors() {
+					labelNames = append(labelNames, labelString)
+				}
+			}
+
+		default:
+			// If neither of the previous cases are true (should be impossible)
+			// then we can just ignore it, because it's invalid too.
+		}
 	}
+
 	return labelNames
 }
