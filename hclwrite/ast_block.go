@@ -1,6 +1,8 @@
 package hclwrite
 
 import (
+	"strings"
+
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -71,4 +73,24 @@ func (b *Block) init(typeName string, labels []string) {
 // tokens that are generated between the blocks open and close braces.
 func (b *Block) Body() *Body {
 	return b.body.content.(*Body)
+}
+
+// Type returns the type name of the block.
+func (b *Block) Type() string {
+	typeNameObj := b.typeName.content.(*identifier)
+	return string(typeNameObj.token.Bytes)
+}
+
+// Labels returns the labels of the block.
+func (b *Block) Labels() []string {
+	labelNames := make([]string, 0, len(b.labels))
+	list := b.labels.List()
+	for _, label := range list {
+		labelObj := label.content.(*quoted)
+		labelString := string(labelObj.tokens.Bytes())
+		// The labelString contains spaces and quotes. we should remove them.
+		trimmed := strings.Trim(labelString, ` "`)
+		labelNames = append(labelNames, trimmed)
+	}
+	return labelNames
 }
