@@ -217,7 +217,7 @@ func TestBodyGetAttribute(t *testing.T) {
 	}
 }
 
-func TestBodyGetBlock(t *testing.T) {
+func TestBodyFirstMatchingBlock(t *testing.T) {
 	src := `a = "b"
 service {
   attr0 = "val0"
@@ -323,7 +323,7 @@ parent {
 				t.Fatalf("unexpected diagnostics")
 			}
 
-			block := f.Body().GetBlock(test.typeName, test.labels)
+			block := f.Body().FirstMatchingBlock(test.typeName, test.labels)
 			if block == nil {
 				if test.want != "" {
 					t.Fatal("block not found, but want it to exist")
@@ -802,7 +802,7 @@ func TestBodySetAttributeValueInBlock(t *testing.T) {
 				t.Fatalf("unexpected diagnostics")
 			}
 
-			b := f.Body().GetBlock(test.typeName, test.labels)
+			b := f.Body().FirstMatchingBlock(test.typeName, test.labels)
 			b.Body().SetAttributeValue(test.attr, test.val)
 			tokens := f.BuildTokens(nil)
 			format(tokens)
@@ -856,8 +856,8 @@ func TestBodySetAttributeValueInNestedBlock(t *testing.T) {
 				t.Fatalf("unexpected diagnostics")
 			}
 
-			parent := f.Body().GetBlock(test.parentTypeName, []string{})
-			child := parent.Body().GetBlock(test.childTypeName, []string{})
+			parent := f.Body().FirstMatchingBlock(test.parentTypeName, []string{})
+			child := parent.Body().FirstMatchingBlock(test.childTypeName, []string{})
 			child.Body().SetAttributeValue(test.attr, test.val)
 			tokens := f.BuildTokens(nil)
 			format(tokens)

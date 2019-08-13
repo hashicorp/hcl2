@@ -85,9 +85,10 @@ func (b *Body) GetAttribute(name string) *Attribute {
 	return nil
 }
 
-// GetBlock returns the block from the body that has the given name,
-// and labels or returns nil if there is currently no matching block.
-func (b *Body) GetBlock(typeName string, labels []string) *Block {
+// FirstMatchingBlock returns a first matching block from the body that has the
+// given name and labels or returns nil if there is currently no matching
+// block.
+func (b *Body) FirstMatchingBlock(typeName string, labels []string) *Block {
 	for n := range b.items {
 		if block, isBlock := n.content.(*Block); isBlock {
 			typeNameObj := block.typeName.content.(*identifier)
