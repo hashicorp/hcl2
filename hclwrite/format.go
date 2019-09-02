@@ -164,19 +164,22 @@ func formatCells(lines []formatLine) {
 	// also impact the "comment" cell.
 	closeAssignChain := func(i int) {
 		for _, chainLine := range lines[chainStart:i] {
-			columns := chainLine.lead.Columns()
-			spaces := (maxColumns - columns) + 1
-			chainLine.assign[0].SpacesBefore = spaces
+			if chainLine.assign != nil {
+				columns := chainLine.lead.Columns()
+				spaces := (maxColumns - columns) + 1
+				chainLine.assign[0].SpacesBefore = spaces
+			}
 		}
 		chainStart = -1
 		maxColumns = 0
 	}
 	for i, line := range lines {
-		if line.assign == nil {
+		// Close the assign chain when we encounter an empty line
+		if line.lead != nil && len(line.lead) == 1 && line.lead[0].Type == hclsyntax.TokenNewline {
 			if chainStart != -1 {
 				closeAssignChain(i)
 			}
-		} else {
+		} else if line.assign != nil {
 			if chainStart == -1 {
 				chainStart = i
 			}
@@ -193,19 +196,22 @@ func formatCells(lines []formatLine) {
 	// Now we'll deal with the comments
 	closeCommentChain := func(i int) {
 		for _, chainLine := range lines[chainStart:i] {
-			columns := chainLine.lead.Columns() + chainLine.assign.Columns()
-			spaces := (maxColumns - columns) + 1
-			chainLine.comment[0].SpacesBefore = spaces
+			if chainLine.comment != nil {
+				columns := chainLine.lead.Columns() + chainLine.assign.Columns()
+				spaces := (maxColumns - columns) + 1
+				chainLine.comment[0].SpacesBefore = spaces
+			}
 		}
 		chainStart = -1
 		maxColumns = 0
 	}
 	for i, line := range lines {
-		if line.comment == nil {
+		// Close the comment chain when we encounter an empty line
+		if line.lead != nil && len(line.lead) == 1 && line.lead[0].Type == hclsyntax.TokenNewline {
 			if chainStart != -1 {
 				closeCommentChain(i)
 			}
-		} else {
+		} else if line.comment != nil {
 			if chainStart == -1 {
 				chainStart = i
 			}
@@ -399,19 +405,9 @@ func linesForFormat(tokens Tokens) []formatLine {
 
 		for i, tok := range line.lead {
 			if i > 0 && tok.Type == hclsyntax.TokenEqual {
-				// We only move the tokens into "assign" if the RHS seems to
-				// be a whole expression, which we determine by counting
-				// brackets. If there's a net positive number of brackets
-				// then that suggests we're introducing a multi-line expression.
-				netBrackets := 0
-				for _, token := range line.lead[i:] {
-					netBrackets += tokenBracketChange(token)
-				}
+				line.assign = line.lead[i:]
+				line.lead = line.lead[:i]
 
-				if netBrackets == 0 {
-					line.assign = line.lead[i:]
-					line.lead = line.lead[:i]
-				}
 				break
 			}
 		}

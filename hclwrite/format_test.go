@@ -2,9 +2,8 @@ package hclwrite
 
 import (
 	"fmt"
-	"testing"
-
 	"reflect"
+	"testing"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
@@ -303,11 +302,11 @@ bungle = (
 zebra = "striped" # baz
 `,
 			`
-a = 1 # foo
+a      = 1         # foo
 bungle = (
   "bonce"
-)                 # baz
-zebra = "striped" # baz
+)                  # baz
+zebra  = "striped" # baz
 `,
 		},
 		{
@@ -319,11 +318,11 @@ bungle=(# woo parens
 zebra="striped"# baz
 `,
 			`
-a = "apple" # foo
-bungle = (  # woo parens
+a      = "apple"   # foo
+bungle = (         # woo parens
   "bonce"
-)                 # baz
-zebra = "striped" # baz
+)                  # baz
+zebra  = "striped" # baz
 `,
 		},
 		{
@@ -607,6 +606,76 @@ module "x" {
   a     = "b"
   abcde = "456"
 }`,
+		},
+		{
+			`
+data "foo" "bar" {
+statement {
+hi = [
+"sen",
+"ten",
+"ce",
+]
+bye = [
+"all"
+]
+}
+}
+`,
+			`
+data "foo" "bar" {
+  statement {
+    hi  = [
+      "sen",
+      "ten",
+      "ce",
+    ]
+    bye = [
+      "all"
+    ]
+  }
+}
+`,
+		},
+		{
+			`
+data "foo" "bar" {
+statement {
+beta = "alpha"
+hi = [
+"sen",
+"ten",
+"ce",
+]
+
+bye = [
+"all",
+]
+byebye = [
+"you",
+]
+}
+}
+`,
+			`
+data "foo" "bar" {
+  statement {
+    beta = "alpha"
+    hi   = [
+      "sen",
+      "ten",
+      "ce",
+    ]
+
+    bye    = [
+      "all",
+    ]
+    byebye = [
+      "you",
+    ]
+  }
+}
+`,
 		},
 	}
 
