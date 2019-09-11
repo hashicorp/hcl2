@@ -87,8 +87,6 @@ func (b *Block) Labels() []string {
 	for _, label := range list {
 		switch labelObj := label.content.(type) {
 		case *identifier:
-			// If label is unquoted, we expect to come here,
-			// but the current implementation seems to always quote it and never reach here.
 			if labelObj.token.Type == hclsyntax.TokenIdent {
 				labelString := string(labelObj.token.Bytes)
 				labelNames = append(labelNames, labelString)
@@ -96,14 +94,6 @@ func (b *Block) Labels() []string {
 
 		case *quoted:
 			tokens := labelObj.tokens
-
-			// FIXME: A workaround for unquoted case
-			// TokenIdent should be *idenifier, but the current implementation seems to wrap it in *quoted.
-			if len(tokens) == 1 && tokens[0].Type == hclsyntax.TokenIdent {
-				labelString := string(tokens[0].Bytes)
-				labelNames = append(labelNames, labelString)
-			}
-
 			if len(tokens) == 3 &&
 				tokens[0].Type == hclsyntax.TokenOQuote &&
 				tokens[1].Type == hclsyntax.TokenQuotedLit &&
