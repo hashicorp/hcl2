@@ -25,22 +25,18 @@ high-level objects that the application can use for further processing.
 
 ## Experimental HCL2
 
-This repository contains the experimental version 2 of HCL. This new version
-combines the initial iteration of HCL with the interpolation language HIL
-to produce a single configuration language that supports arbitrary expressions.
+This repository was used for the initial development of version 2 of HCL, but
+is now archived because the work from this repository was incorporated
+back in to [the main HCL repository](https://github.com/hashicorp/hcl).
 
-At this time the HCL2 syntax and the Go API are still evolving.
-Backward-compatibility is not guaranteed and so any application using this
-library should use vendoring.
+This repository remains here for the moment for compatibility with existing
+callers that imported the experimental version. We strongly encourage
+switching to a stable release of HCL 2 as soon as possible. For more
+information on installing HCL 1 and/or HCL 2, please see
+[the Version Selection guide](https://github.com/hashicorp/hcl/wiki/Version-Selection).
 
-The new implementation has a completely new parser and Go API, with no direct
-migration path. Although the syntax is similar, the implementation takes some
-very different approaches to improve on some "rough edges" that existed with
-the original implementation and to allow for more robust error handling.
-
-Once this new implementation reaches stability, its package paths will be
-changed to reflect that it is the _current_ HCL implementation. At that time,
-the original implementation will be archived.
+There will be no further development in this temporary experimental HCL 2
+repository.
 
 ## Why?
 
